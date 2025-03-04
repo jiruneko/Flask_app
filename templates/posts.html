@@ -1,0 +1,6 @@
+<h1>ブログ投稿一覧</h1>
+<ul>
+    {% for post in posts %}
+    <li>{{ post.title }} by {{ post.author }}</li>
+    {% endfor %}
+</ul>

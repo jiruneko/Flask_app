@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>ブログアプリケーション</h1>
-    <a href="/create" role="button">新規作成画面</a>
-{% for post in posts %}
-    <article>
-        <h2>{{ post.title }}</h2>
-        <p>作成日時：{{ post.created_at }}</p>
-        <a href="/{{post.id}}/update" role="button">編集</a>
-        <a href="/{{post.id}}/delete" role="button">削除</a>
-        <p>{{ post.body }}</p>
-    </article>
-{% endfor %}
+<p>ようこそ、Flaskアプリへ！</p>
 {% endblock %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    {% if user %}
+    <p>こんにちは、{{ user }}さん！</p>
+    {% else %}
+    <p>こんにちは、ゲストさん！</p>
+    {% endif %}
+
+    <ul>
+        {% for item in items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

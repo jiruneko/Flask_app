@@ -1,61 +1,72 @@
-from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, render_template
 from datetime import datetime
-import pytz
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
-db = SQLAlchemy(app)
 
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), unique=False, nullable=False)
-    body = db.Column(db.String(120), unique=False, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(pytz.timezone('Asia/Tokyo')))
 
-# 初期化時にデータベースを作成する
-with app.app_context():
-    db.create_all()
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/")
 def index():
-    if request.method == 'GET':
-        posts = Post.query.all()
-    return render_template('index.html', posts=posts)
+    print("Rendering index.html")  # ここでログを確認
+    return render_template(
+        "index.html", title="ホームページ", content="これはサンプルページです"
+    )
 
-@app.route('/create', methods=['GET', 'POST'])
-def create():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        body = request.form.get('body')
-        
-        post = Post(title=title, body=body)
-        
-        db.session.add(post)
-        db.session.commit()
-        return redirect('/')
-    else:
-        return render_template('create.html')
-    
-@app.route('/<int:id>/update', methods=['GET', 'POST'])
-def update(id):
-    post = Post.query.get(id)
-    if request.method == 'GET':
-        return render_template('update.html', post=post)
-    else:
-        post.title = request.form.get('title')
-        post.body = request.form.get('body')
-                
-        db.session.commit()
-        return redirect('/')
-    
-@app.route('/<int:id>/delete', methods=['GET'])
-def delete(id):
-    post = Post.query.get(id)
-    
-    db.session.delete(post)
-    db.session.commit()
-    return redirect('/')
+
+@app.route("/profile")
+def profile():
+    user = {"name": "Taro", "age": 30, "localhost": "Tokyo"}
+    return render_template("profile.html", user=user)
+
+
+@app.route("/post")
+def posts():
+    post = [
+        {"title": "Flaskの使い方", "author": "Alice"},
+        {"title": "jinja2の紹介", "author": "Bob"},
+        {"title": "Flaskのルーティング", "author": "Charlie"},
+    ]
+
+    return render_template("posts.html", posts=posts)
+
+
+@app.route("/dashboard")
+def dashbord():
+    user_logged_in = True
+    return render_template("dashboard.html", logged_in=user_logged_in)
+
+
+def format_datatime(value, format="%Y/%m/%d"):
+    return value.strtime(format)
+
+
+app.jinja_env_.filters["datetime"] = format_datatime
+
+
+@app.route("/time")
+def show_time():
+    now = datetime.now()
+    return render_template("time.html", current_time=now)
+
+
+@app.route("/submit", methods=["GET", "POST"])
+def submit():
+    if request.method == "POST":
+        name = request.form["name"]
+        return ["Hello {name}!"]
+    return render_template("submit.html")
+
+
+@app.route("/search", methods=["GET"])
+def search():
+    query = request.args.get("query")
+    return f"You searched for: {query}"
+
+
+@app.route("/submit", methods=["POST"])
+def submit():
+    name = request.form.get("name")
+    return f"Hello, {name}!"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
